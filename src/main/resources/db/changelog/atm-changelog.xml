@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="06.06.2022 23:30:30" author="oguzhan.turan">
+        <sql>
+            CREATE TABLE BANK
+            (
+                id                 bigserial    NOT NULL PRIMARY KEY,
+                name               varchar(256) NOT NULL,
+                status             varchar(16)  DEFAULT 'ACTIVE',
+                version            smallint     NOT NULL DEFAULT 0,
+                created_by         varchar(64),
+                created_date       timestamp    NOT NULL DEFAULT now(),
+                last_modified_by   varchar(64),
+                last_modified_date timestamp,
+                CONSTRAINT pk_bank_id PRIMARY KEY (id)
+            );
+            CREATE INDEX idx_bank_id ON bank (id);
+        </sql>
+        <sql>
+            COMMENT ON TABLE bank IS 'Information of banks';
+            COMMENT ON COLUMN bank.id IS 'primary key of the bank table';
+            COMMENT ON COLUMN bank.name IS 'Name of Bank';
+            COMMENT ON COLUMN bank.status IS 'Status of Bank > ACTIVE / PASSIVE';
+            COMMENT ON COLUMN bank.version IS 'Version number';
+            COMMENT ON COLUMN bank.created_by IS 'created by ... ';
+            COMMENT ON COLUMN bank.created_date IS 'created date';
+            COMMENT ON COLUMN bank.last_modified_by IS 'the last modified by ...';
+            COMMENT ON COLUMN bank.last_modified_date IS 'date-time of the last modification';
+        </sql>
+    </changeSet>
+    <changeSet id="06.06.2022 23:35:30" author="oguzhan.turan">
+        <sql>
+            CREATE TABLE ACCOUNT
+            (
+                id                 bigserial    NOT NULL PRIMARY KEY,
+                account_number     bigint       NOT NULL,
+                pin                bigint       NOT NULL,
+                balance            bigint       NOT NULL DEFAULT 0,
+                overdraft          bigint       NOT NULL DEFAULT 0,
+                bank_id            int          NOT NULL ,
+                status             varchar(16)  DEFAULT 'ACTIVE',
+                version            smallint     NOT NULL DEFAULT 0,
+                created_by         varchar(64),
+                created_date       timestamp    NOT NULL DEFAULT now(),
+                last_modified_by   varchar(64),
+                last_modified_date timestamp,
+                CONSTRAINT pk_account_id PRIMARY KEY (id),
+                CONSTRAINT fk_account_bank_id FOREIGN KEY (bank_id) REFERENCES bank(id)
+            );
+            CREATE INDEX idx_account_id ON account (id);
+            CREATE INDEX idx_account_number ON account (account_number);
+        </sql>
+        <sql>
+            COMMENT ON TABLE account IS 'Account information table';
+            COMMENT ON COLUMN account.id IS 'primary key of the bank table';
+            COMMENT ON COLUMN account.account_number IS 'Account number';
+            COMMENT ON COLUMN account.pin IS 'Account owner pin';
+            COMMENT ON COLUMN account.balance IS 'Current balance of account';
+            COMMENT ON COLUMN account.overdraft IS 'Current overdraft amount of account';
+            COMMENT ON COLUMN account.bank_id IS 'Bank info of the account';
+            COMMENT ON COLUMN account.status IS 'Status of the account';
+            COMMENT ON COLUMN account.version IS 'Version number';
+            COMMENT ON COLUMN account.created_by IS 'created by ... ';
+            COMMENT ON COLUMN account.created_date IS 'created date';
+            COMMENT ON COLUMN account.last_modified_by IS 'the last modified by ...';
+            COMMENT ON COLUMN account.last_modified_date IS 'date-time of the last modification';
+        </sql>
+    </changeSet>
+    <changeSet id="06.06.2022 23:40:30" author="oguzhan.turan">
+        <sql>
+            CREATE TABLE TRANSACTION
+            (
+                id                 bigserial    NOT NULL PRIMARY KEY,
+                date_time          timestamp    NOT NULL DEFAULT now(),
+                type               varchar(16)  NOT NULL,
+                amount             bigint       NOT NULL DEFAULT 0,
+                account_id         bigint       NOT NULL ,
+                source_type        varchar(16)  NOT NULL,
+                status             varchar(16)  DEFAULT 'IN_PROGRESS',
+                version            smallint     NOT NULL DEFAULT 0,
+                created_by         varchar(64),
+                created_date       timestamp    NOT NULL DEFAULT now(),
+                last_modified_by   varchar(64),
+                last_modified_date timestamp,
+
+                CONSTRAINT pk_transaction_id PRIMARY KEY (id),
+                CONSTRAINT fk_transaction_account_id FOREIGN KEY (account_id) REFERENCES account(id)
+            );
+            CREATE INDEX idx_transaction_id ON TRANSACTION (id);
+        </sql>
+        <sql>
+            COMMENT ON TABLE TRANSACTION IS 'Historical Data of Transicational Operations ';
+            COMMENT ON COLUMN TRANSACTION.id IS 'primary key of the transaction table';
+            COMMENT ON COLUMN TRANSACTION.date_time IS 'Operation date and time.';
+            COMMENT ON COLUMN TRANSACTION.type IS 'type of the operation (WITHDRAW, DEPOSIT etc.)';
+            COMMENT ON COLUMN TRANSACTION.amount IS 'transaction amount';
+            COMMENT ON COLUMN TRANSACTION.account_id IS 'Relational Account record foreign key';
+            COMMENT ON COLUMN TRANSACTION.source_type IS 'source type of the operation (ACCOUNT,  ATM etc.)';
+            COMMENT ON COLUMN TRANSACTION.status IS 'Status of the transaction. default is in_progress. After completed > COMPLETED';
+            COMMENT ON COLUMN TRANSACTION.version IS 'Version number';
+            COMMENT ON COLUMN TRANSACTION.created_by IS 'created by ... ';
+            COMMENT ON COLUMN TRANSACTION.created_date IS 'created date';
+            COMMENT ON COLUMN TRANSACTION.last_modified_by IS 'the last modified by ...';
+            COMMENT ON COLUMN TRANSACTION.last_modified_date IS 'date-time of the last modification';
+        </sql>
+    </changeSet>
+    <changeSet id="08.06.2022 01:30:30" author="oguzhan.turan">
+        <sql>
+            CREATE TABLE ATM
+            (
+                id                 bigserial    NOT NULL PRIMARY KEY,
+                atm_no             int          NOT NULL,
+                bank_id            bigint       NOT NULL,
+                banknote_type      varchar(16)  NOT NULL,
+                banknote_count     int          NOT NULL DEFAULT 0,
+                address            varchar(256) NOT NULL,
+                status             varchar(16)  DEFAULT 'ACTIVE',
+                version            smallint     NOT NULL DEFAULT 0,
+                created_by         varchar(64),
+                created_date       timestamp    NOT NULL DEFAULT now(),
+                last_modified_by   varchar(64),
+                last_modified_date timestamp,
+
+                CONSTRAINT pk_atm_id PRIMARY KEY (id),
+                CONSTRAINT fk_atm_bank_id FOREIGN KEY (bank_id) REFERENCES bank(id)
+            );
+            CREATE INDEX idx_atm_id ON TRANSACTION (id);
+        </sql>
+        <sql>
+            COMMENT ON TABLE ATM IS 'Money hold machine current state ';
+            COMMENT ON COLUMN ATM.id IS 'primary key of the table';
+            COMMENT ON COLUMN ATM.atm_no IS 'atm no';
+            COMMENT ON COLUMN ATM.bank_id IS 'foreign key of the table. relation with bank';
+            COMMENT ON COLUMN ATM.banknote_type IS 'money banknote type';
+            COMMENT ON COLUMN ATM.banknote_count IS 'count of banknote type ';
+            COMMENT ON COLUMN ATM.address IS 'atm address';
+            COMMENT ON COLUMN ATM.status IS 'Status of the atm. PASSIVE or ACTIVE';
+            COMMENT ON COLUMN ATM.version IS 'Version number';
+            COMMENT ON COLUMN ATM.created_by IS 'created by ... ';
+            COMMENT ON COLUMN ATM.created_date IS 'created date';
+            COMMENT ON COLUMN ATM.last_modified_by IS 'the last modified by ...';
+            COMMENT ON COLUMN ATM.last_modified_date IS 'date-time of the last modification';
+        </sql>
+    </changeSet>
+</databaseChangeLog>
