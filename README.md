@@ -8,7 +8,7 @@
  * ATM initializes with €1500 made up of 10 x €50s, 30 x €20s, 30 x €10s and 20 x €5s.
  
  
- #### You can interact with application with Open API interface after run the application on your local machine >> http://localhost:8080/swagger-ui/index.html [http://localhost:8080/swagger-ui/index.html]
+ #### You can interact with application with Open API interface after run the application on your local machine >> http://localhost:8080/swagger-ui/index.html
  
  ## Technologies
  - Java 11
