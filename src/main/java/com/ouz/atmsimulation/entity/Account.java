@@ -1,5 +1,6 @@
 package com.ouz.atmsimulation.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class Account extends BaseEntity{
     @Column(name="OVERDRAFT")
     private BigDecimal overdraft;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "BANK_ID", referencedColumnName = "ID")
     private Bank bank;

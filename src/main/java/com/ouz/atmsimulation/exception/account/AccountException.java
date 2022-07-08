@@ -1,12 +1,10 @@
 package com.ouz.atmsimulation.exception.account;
 
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.Locale;
 
 @RestControllerAdvice
 public class AccountException extends RuntimeException {
@@ -14,8 +12,6 @@ public class AccountException extends RuntimeException {
     protected String message;
     protected HttpStatus httpStatus;
     protected String desc;
-
-    protected final static Locale SYSTEM_LOCALESYSTEM_LOCALE = LocaleContextHolder.getLocale();
 
     public AccountException() {
         desc = "This is an exception that throws when Account operations goes wrong  !";

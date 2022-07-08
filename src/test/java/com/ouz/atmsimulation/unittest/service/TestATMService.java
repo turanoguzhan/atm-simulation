@@ -61,6 +61,9 @@ public class TestATMService {
 
     private ResponseEntity response;
 
+
+    private final static Locale SYSTEM_LOCALESYSTEM_LOCALE = LocaleContextHolder.getLocale();
+
     @BeforeEach
     void beforeEach(){
 
@@ -141,6 +144,8 @@ public class TestATMService {
         ResponseEntity response = atmService.atmOperation(account.getAccountNumber(),159753L,account.getBalance(), TransactionType.WITHDRAW);
 
         assertEquals(HttpStatus.FORBIDDEN,response.getStatusCode());
+
+        verify(accountRepository).findByAccountNumber(account.getAccountNumber());
     }
 
     @Test
@@ -150,6 +155,28 @@ public class TestATMService {
         ResponseEntity response = atmService.atmOperation(account.getAccountNumber(),account.getPin(),BigDecimal.valueOf(5000L), TransactionType.WITHDRAW);
 
         assertEquals(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE,response.getStatusCode());
+
+        verify(accountRepository).findByAccountNumber(account.getAccountNumber());
+    }
+
+    @Test
+    public void testAtmOperationWithdraw_AccountBadRequestException()  {
+
+        ResponseEntity response = atmService.atmOperation(null,account.getPin(),BigDecimal.valueOf(5000L), TransactionType.WITHDRAW);
+
+        assertEquals(HttpStatus.BAD_REQUEST,response.getStatusCode());
+    }
+
+    @Test
+    public void testAtmOperationWithdraw_AccountAmountException()  {
+
+        when(accountRepository.findByAccountNumber(account.getAccountNumber())).thenReturn(Optional.ofNullable(account));
+
+        ResponseEntity response = atmService.atmOperation(account.getAccountNumber(),account.getPin(),null, TransactionType.WITHDRAW);
+
+        assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
+
+        verify(accountRepository).findByAccountNumber(account.getAccountNumber());
     }
 
     @Test
@@ -159,6 +186,8 @@ public class TestATMService {
         ResponseEntity response = atmService.atmOperation(account.getAccountNumber(),account.getPin(),account.getBalance(), TransactionType.WITHDRAW);
 
         assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
+
+        verify(accountRepository).findByAccountNumber(account.getAccountNumber());
     }
 
     @Test

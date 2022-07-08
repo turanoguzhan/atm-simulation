@@ -9,10 +9,7 @@ import com.ouz.atmsimulation.enums.SourceType;
 import com.ouz.atmsimulation.enums.StatusType;
 import com.ouz.atmsimulation.enums.TransactionType;
 import com.ouz.atmsimulation.exception.ExceptionMessage;
-import com.ouz.atmsimulation.exception.account.AccountException;
-import com.ouz.atmsimulation.exception.account.AccountHasNotEnoughBalance;
-import com.ouz.atmsimulation.exception.account.AccountNotFoundException;
-import com.ouz.atmsimulation.exception.account.AccountPinIncorrectException;
+import com.ouz.atmsimulation.exception.account.*;
 import com.ouz.atmsimulation.exception.atm.ATMException;
 import com.ouz.atmsimulation.exception.atm.ATMNoMoneyException;
 import com.ouz.atmsimulation.exception.atm.ATMNotEnoughMoneyException;
@@ -65,6 +62,14 @@ public class ATMServiceImpl implements ATMService{
             pinValidation(account, pin);
 
             logTransaction(account, BigDecimal.ZERO, TransactionType.EXPOSE, SourceType.ATM);
+
+            return ResponseEntity
+                    .ok(new ATMSuccessMessageDTO(account.getAccountNumber(),null,
+                            account.getBalance(),TransactionType.EXPOSE,LocalDateTime.now(),
+                            messageSource.getMessage("account.expose.successful",
+                                    null,
+                                    SYSTEM_LOCALESYSTEM_LOCALE)));
+
         } catch(AccountException ae){
         return ResponseEntity.status(ae.getStatus()).body(
                 new ExceptionMessage(messageSource.getMessage(ae.getMessage(),new Object[]{},"an error occured",SYSTEM_LOCALESYSTEM_LOCALE),
@@ -72,13 +77,6 @@ public class ATMServiceImpl implements ATMService{
                         LocalDateTime.now(),
                         ae.getStatus().value()));
         }
-
-        return ResponseEntity
-                .ok(new ATMSuccessMessageDTO(account.getAccountNumber(),null,
-                        account.getBalance(),TransactionType.EXPOSE,LocalDateTime.now(),
-                        messageSource.getMessage("account.expose.successful",
-                                null,
-                                SYSTEM_LOCALESYSTEM_LOCALE)));
     }
 
     @Override
@@ -90,6 +88,8 @@ public class ATMServiceImpl implements ATMService{
             account =  getAccountByAccountNumber(accountNumber);
 
             pinValidation(account,pin);
+
+            checkAmountIsValid(amount);
 
             if(TransactionType.WITHDRAW.equals(transactionType) && !account.checkTotalAmountIsEnough(amount)){
                 throw new AccountHasNotEnoughBalance();
@@ -103,6 +103,16 @@ public class ATMServiceImpl implements ATMService{
 
             modifyAccountBalance(account,amount,transactionType);
             logTransaction(account,amount, transactionType, SourceType.ACCOUNT);
+
+            return ResponseEntity
+                    .ok(new ATMSuccessMessageDTO(account.getAccountNumber(),moneyValues,
+                            account.getBalance(),transactionType,LocalDateTime.now(),
+                            messageSource.getMessage(
+                                    TransactionType.WITHDRAW.equals(transactionType)
+                                            ?"account.withdraw.successful"
+                                            :"account.deposit.successful",
+                                    null,
+                                    SYSTEM_LOCALESYSTEM_LOCALE)));
         }catch(AccountException ae){
             return ResponseEntity.status(ae.getStatus()).body(
                     new ExceptionMessage(messageSource.getMessage(ae.getMessage(),new Object[]{},"an error occured",SYSTEM_LOCALESYSTEM_LOCALE),
@@ -116,26 +126,29 @@ public class ATMServiceImpl implements ATMService{
                             LocalDateTime.now(),
                             atme.getStatus().value()));
         }
-
-        return ResponseEntity
-                .ok(new ATMSuccessMessageDTO(account.getAccountNumber(),moneyValues,
-                        account.getBalance(),transactionType,LocalDateTime.now(),
-                        messageSource.getMessage(
-                        TransactionType.WITHDRAW.equals(transactionType)
-                                ?"account.withdraw.successful"
-                                :"account.deposit.successful",
-                        null,
-                        SYSTEM_LOCALESYSTEM_LOCALE)));
     }
 
     private Account getAccountByAccountNumber(Long accountNumber){
+        if(Objects.isNull(accountNumber)){
+            throw new AccountBadRequestException();
+        }
+
         return accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(new AccountNotFoundException());
     }
 
     private void pinValidation(Account account, Long pin){
+        if(Objects.isNull(pin)){
+            throw new AccountBadRequestException();
+        }
         if(!account.validatePin(pin)){
             throw new AccountPinIncorrectException();
+        }
+    }
+
+    private void checkAmountIsValid(BigDecimal amount){
+        if(Objects.isNull(amount)){
+            throw new AccountAmountException();
         }
     }
 

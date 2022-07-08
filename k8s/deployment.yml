@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atmsimulation
+  namespace: demo
+  labels:
+    name: atmsimulation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: atmsimulation
+  template:
+    metadata:
+      labels:
+        app: atmsimulation
+    spec:
+      containers:
+        - name: atmsimulation
+          image: $REMOTE_REPO_ADDRESS/$PACKAGE/atmsimulation:latest
+          imagePullPocliy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP

@@ -1,4 +1,37 @@
-stages{
+pipeline{
+    agent any
+    stages{
+        stage('Checkout code'){
+            steps{
+                checkout scm
+            }
+        }
+        stage('Build'){
+            tools {
+                jdk "Java 11"
+                maven "LOCALMAVEN"
+                }
+                steps {
+                    echo 'Maven clean install running ...'
+                    sh 'mvn clean install'
+                }
+            }
+        }
+        stage('Create and Push Image'){
+            steps {
+                echo 'Image building and pushing running ...'
+                sh'''
+                docker build -t atm-simulation:latest .
+                docker login -u $REPO_USERNAME -p $REPO_PASSWORD $REMOTE_REPO_ADDRESS
+                docker image tag atm-simulation:latest $REMOTE_REPO_ADDRESS/$PACKAGE/atmsimulation:v$VERSION
+                docker image push $REMOTE_REPO_ADDRESS/$PACKAGE/atmsimulation:v$VERSION
+                '''
+            }
+        }
+    }
+}
+
+
 
 stage("build application"){
 }

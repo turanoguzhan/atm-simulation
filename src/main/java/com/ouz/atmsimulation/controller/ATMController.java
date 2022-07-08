@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/atm")
-@SecurityRequirement(name = "atm-simulation-security")
 public class ATMController {
 
     private final ATMServiceImpl atmService;
@@ -29,8 +27,8 @@ public class ATMController {
     }
 
     @GetMapping("/expose")
-    @PreAuthorize(value="${USER}")
-    @Operation(description = "it returns void because you want to get all account pişşiik")
+    @PreAuthorize(value="${ADMIN}")
+    @Operation(description = "it returns account current information if account valid and pin is correct.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found Accounr",
                     content = { @Content(mediaType = "application/json",
@@ -53,7 +51,7 @@ public class ATMController {
     }
 
     @PutMapping( "/withdraw")
-    @PreAuthorize(value="${USER}")
+    @PreAuthorize(value="${ADMIN}")
     @Operation(description = "Withdraw operation. You can get money from your authorized account.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -83,7 +81,7 @@ public class ATMController {
     }
 
     @PutMapping( "/deposit")
-    @PreAuthorize(value="${USER}")
+    @PreAuthorize(value="${ADMIN}")
     @Operation(description = "Deposit operation. You can add money to your authorized account. ")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",

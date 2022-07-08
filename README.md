@@ -14,6 +14,7 @@
  - Java 11
  - Spring Boot
  - Docker
+ - Kubernetes ( Call a request via nodePort )
  
  ## Libraries
  - Spring Boot Security ( Basic Auth )
@@ -22,3 +23,8 @@
  - Liquibase 4.11.0
  - OpenAPI 1.6.9
  - Lombok
+
+To run the project on your local machine,
+- ```mvn clean install```
+- ```docker build -t atmsimulation:latest .```
+- ```docker run -dp 8080:8080 atmsimulation:latest```
